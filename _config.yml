@@ -1,24 +1,29 @@
-timezone: America/Los_Angeles
-
 # Dependencies
-markdown: kramdown
-highligher: rouge
-fenced_code_blocks:  true
+markdown:         redcarpet
+highlighter:      pygments
 
 # Permalinks
-#
-# Use of `relative_permalinks` ensures post links from the index work properly.
-permalink:           pretty
+permalink:        pretty
 
 # Setup
-title:
-tagline:          Bruce Eckel's Programming Blog
-url:              http://carahainingwang.github.io/
+title:            Haining's
+tagline:          'Soft thoughts for programmers'
+description:      Programming Blog
+url:              https://carahainingwang.github.io
 baseurl:          /
 
-# About/contact
 author:
-  name:           Cara Wang
-  email:          whnzinc@gmail.com
+  name:           'Mark Otto'
+  url:            https://twitter.com/mdo
 
-theme: jekyll-theme-cayman
+plugins: [jekyll-paginate]
+paginate:         5
+
+
+# Custom vars
+version:          2.1.0
+
+
+
+github: [metadata]
+repo: https://github.com/carahainingwang
