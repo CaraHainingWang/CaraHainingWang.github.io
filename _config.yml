@@ -20,3 +20,5 @@ baseurl:          /
 author:
   name:           Cara Wang
   email:          whnzinc@gmail.com
+
+theme: jekyll-theme-cayman
