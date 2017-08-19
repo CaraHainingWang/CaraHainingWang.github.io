@@ -9,7 +9,7 @@ title:            Haining's
 tagline:          'Soft thoughts for programmers'
 description:      Programming Blog
 url:              https://carahainingwang.github.io
-baseurl:          https://carahainingwang.github.io/
+baseurl:          /
 
 author:
   name:           'Mark Otto'
@@ -21,7 +21,8 @@ paginate:         5
 
 # Custom vars
 version:          1.0.0
-
+params:
+  disqusShortname: "spf13"
 
 
 github: [metadata]
