@@ -22,7 +22,7 @@ paginate:         5
 # Custom vars
 version:          1.0.0
 params:
-  disqusShortname: "spf13"
+  disqusShortname: "haining"
 
 
 github: [metadata]
