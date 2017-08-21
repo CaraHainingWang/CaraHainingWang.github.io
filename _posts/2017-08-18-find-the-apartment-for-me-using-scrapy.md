@@ -4,37 +4,31 @@ title: "How I Found the Apartment for Me Using Scrapy"
 published: true
 ---
 
-Apartment hunting is a painful experience. And if you are like me who struggled
-to move with my newborn baby to the San Francisco Bay Area, you have to spend even more time to browse through websites to make sure everything is good.
-
-To make matters worse, I can only take shuttles to work since my husband is going to do some long distance commute with our car in the coming year. Therefore, I need to make sure the apartment is super close to some shuttle
-stop (say ten minutes by foot). Checking each potential apartment to all nearby
-shuttle stations is extremely tedious as well.
+Apartment hunting is a painful experience. If you were like me who is moving
+with my newborn baby to the San Francisco Bay Area, you would have to spend even more time browsing through websites to make sure everything is OK before making a commitment on the lease. Besides the general requirement on neighborhood, distance to work, bedroom/bathroom numbers, rents, etc. I also need to make sure it is close to some shuttle stations to facilitate my every day commute. Checking the address of each potential apartment to all nearby shuttle stations becomes extremely tedious since no known website supports the function of taking a list of address and returning only  apartments that are close to at least one of the addresses.
 
 <img src="{{ site.baseurl }}images/apartments_map.png" alt="apartment map" style="width: 500" />
 
-After spending a few hours looking on the Internet. I became really distraught. It suddenly came to me that before we can actually save money to buy a place, I may need to do this kinds of search once in a while. Why not try to build some simple command line tool to help me to generate a list of promising apartments with one key stroke? I am new to web crawlers and I have only one week before I have to find a good place to live, but I believe I can do it!
+After spending a few hours looking on the Internet. I became really distraught. In fact, I might need to go through this ordeal again and again before we can actually save up enough money to buy a place in the bay area with this soaring housing price. So why not try to build some simple command line tool to generate a list of promising apartments automatically? I am new to web crawlers and I have only one week before I have to find a good place to live, but I believe I can do it!
 
-To make things a little easier, I probably don't need to make complex search across multiple websites for now since I won't consider sub-lease or condos because of my baby. As a result, `apartments.com` seems to be a great choice. So let's get started!
-
+To make things a little easier, I probably don't need to make complex searches across multiple websites (at least for this time) since I won't consider sub-lease or condos because of my baby. After some searching and comparing, `apartments.com` seems to be a great choice. So let's get started!
 
 ## Step 1: Build the Web Crawler
 
-I chose to use python and [Scrapy]("https://scrapy.org/") to create the Web Crawler since they are relatively straight forward to learn and use.
+I chose to use python and [Scrapy]("https://scrapy.org/") to create the Web Crawler since they are relatively straight-forward to learn and use.
 
 ### Install Scrapy
-Scrapy is an application framework for crawling websites and extracting structured data. Even
-though Scrapy was original designed for web scraping, it can also be used to extract data using APIs or as a general purpose web crawler. To install Scrapy, just run
+Scrapy is an application framework for crawling websites and extracting structured data. Even though it was originally designed for web scraping, it can also be used to extract data using APIs or as a general purpose web crawler. To install Scrapy, just run
 ```bash
 pip install scrapy
 ```
 ### Create a project
-Before start scraping, we need to set up a new Scrapy project. In a directory where you'd like to to store your code and run:
+Before starting scraping, we need to set up a new Scrapy project by running the following command in a directory where you'd like to to store your code.
 ```bash
 scrapy startproject findApartments
 ```
 Alternatively, you can use `scrapy startproject findApartments [project_dir]` to
-specify project_dir in the command line.
+specify project_dir in the command line directly.
 
 `startproject` creates a `findApartments` directory with the following contents:
 ```python
@@ -105,7 +99,6 @@ later using `XPath`. The code looks much neater without those extraction code.
 
 The crawl started by making requests to the URLs defined in the start_urls.
 
-
 In my case, I would like to make the start_urls to be configurable so that I can specify
 which cities / areas I would like to extend my apartment search to.
 I use a `json` file as an input.
@@ -126,21 +119,17 @@ You can add more query entries to fine-tune the initial search, such as mininum
 number of bed/bathroom, which are all supported by apartments.com.
 
 The initial urls are determined by `start_requests` function. If you have a pre-determined
-initial urls instead of configurable ones, you can use a short-cut form by directly specify
+initial urls instead of some configurable ones, you can use a short-cut form by directly specify
 ```python
 start_urls = [urls_list]
 ```
 as a class variable instead of using the class method.
 
-After specifying the starting urls, the code further elaborates how each url should be processed using the `parse()` method. In particular, we first extract the url that link
-to the list of apartments for each particular area (the urls are extracted using `XPath` and will be introduced briefly later), and then delegate the processing to a method called
+After specifying the starting urls, the code further elaborates how each url should be processed using the `parse()` method. In particular, we first extract the urls that link
+to the list of apartments for each particular area (the urls are extracted using `XPath` and will be introduced briefly later), and then delegate the extraction of each apartment info to a method called
 `parse_apartment`.
 
-To make it easier to see the logic, I have omitted the relatively tedious extraction process
-for each entry we are interested in. We can see a recursive call at the end.
-In our case, the website structure is pretty simple, it shows a list of apartments, but
-can have multiple pages if the list is too long. Therefore, we only need to check whether
-we have next_page or not and then perform another round of `parse_apartment` when needed.
+To make it easier to see the logic, I have omitted the relatively tedious extraction process. We can see a recursive call at the end that will keep parsing for apartment unless it is the last page available.
 
 ### About XPath
 XPath expressions provide a very powerful tool for extracting web contents. The primary purpose
@@ -167,16 +156,16 @@ The HTML element for urls to some apartment page looks like the following
 ```html
 <article class="diamond placard" data-listingid="some id" data-url="some url">
 ```
-To get all the `data-urls`, we can use the following xpath expression.
+To get all the `data-urls`, we can use the following `XPath` expression.
 ```python
 apartment_urls = response.xpath('//article[contains(@data-url, "www.apartments.com")]/@data-url').extract()
 ```
 Instead of selecting all `article` node, we filtered out some articles by specifying
-only articles with `data-url` that contains `www.apartments.com`, this is because on the webpage there is some article node that is not linked to any apartment page and we don't want to crawl those urls. The `extract()` method is used to extract the text from `data-url` instead of the actual node. Note that apartment_urls is a list and an empty one if there is no element satisfying the XPath expression.
+only articles with `data-url` that contains `www.apartments.com`. We have to do this because there exists some article node that is not linked to any apartment page and we don't want to crawl those urls. The `extract()` method is used to extract the text from `data-url` instead of the actual node. Note that `apartment_urls` is a list and an empty one if there is no element satisfying the `XPath` expression.
 
 _Example 2_: Parsing data from the table
 For table data passing, we need to first locate the right table in the page since there
-could be exist many tables. For our case, the table is under some navigation tab and we
+could exist many tables. For our case, the table is under some navigation tab and we
 only need to select the one that is active.
 ```python
 table_entries = response.xpath('//div[contains(@class, "active")]/*/*/*/tr')
@@ -188,30 +177,30 @@ for entry in table_entries:
     avail_date = entry.xpath('./td[contains(@class, "avail")]/text()').re(r'(\w+)')
     ...
 ```
-Note that for each entry we are using relative addressing `./` instead of `//`.
-'//' will select every node from the page, while `./` will only search in the child node from the current one. `extract_first()` is like `extract()`, but returns only the first element from the list returned by `extract()` and returns `None` if there is nothing to extract. For `avail_date`, I am using a regular expression method `re()` to get the right format. In this particular case, I am just getting rid of some unnecessary white spaces.
+For each entry, we use relative addressing `./` instead of `//`.
+The difference is that '//' will select every node from the page by searching from the root node, while `./` will only search in the child node from the current one. `extract_first()` is like `extract()`, but returns only the first element from the list and returns `None` if there is nothing to extract. For `avail_date`, I use a regular expression method `re()` to get the right format, which gets rid of some annoying white spaces.
 
 ### Some Data Cleaning
-Even after we get all the information we need, it doesn't mean we have all the clean data that is ready for storing and data processing. For example, we need number of bathrooms to be a float number since it is possible to have 1\u00bd bedrooms.
+After we get all the information we need, we may still need to clean up the data a little more before storing it. For example, we need the number of bathrooms to be a float number since it is possible to have 1\u00bd bedrooms.
 
-Another important step in data cleaning is to give the right default value when the corresponding data is missing. For example, no avail_date is likely to mean the unit is not available and we should set the default value to be `date.max`. Some apartment may not have a bedroom number because it is a studio, so it makes more sense to set the default bedroom number to be 0.
+Another important step in data cleaning is to give the right default value when the corresponding data is missing. For example, no avail_date is likely to mean the unit is not available and we should set the default value to be `date.max`. In another case, some apartment may not have a bedroom number because it is a studio, so it makes more sense to set the default bedroom number to be 0.
 
-### Initiate the crawling
-`scrapy crawl` can be used to initiate the crawling, and you can also add output filename and some arguments to the spider in the following form
+### Initiate the Crawling
+`scrapy crawl` can be used to initiate the crawling, and you can also add an output filename and some arguments to the spider in the following form
 ```
 scrapy crawl apartments -o outputFile.json -a input=input_data
 ```
 
 ## Data Processing
-After getting the data, the next step is to filter out the apartments we are truly interested.
-Recall that one import factor that I care about is whether the apartment is close to some shuttle station. Therefore, we will first find a way to get the distance data and then build a command line tool that can be used to filter the data we need.
+After getting the data, the next step is to get the list of apartments that fit our requirements.
+Recall that one important factor I care is whether the apartment is close to some shuttle station. Therefore, we will first find a way to get the distance data and then build a command line tool that can be used to filter the data we need.
 
 ### Pre-processing Using Google Map APIs
-The `googlemaps` api is readily available for us to get the direction data. In order to find the closest station to some apartment, we can simply iterate through all available stations and initiate an API for the walking time from the apartment to each station to find the closest one. However, since we can have hundreds of apartment candidate and roughly 30 stations to consider. This is definitely too much. In fact, Google Direction API only supports 2500 free api calls a day. I don't want to spend money for any unnecessary API calls.
+The `googlemaps` api is readily available for us to get the direction data. In order to find the closest station to some apartment, we can simply iterate through all available stations and initiate an API call for the walking time from the apartment to each station to find the closest one. However, since we can have hundreds of apartment candidate and roughly 30 stations to consider. This is definitely too much. In fact, Google Direction API only supports 2500 free api calls a day. I don't want to spend money for any unnecessary API calls.
 
 I mainly use the following strategies to save API calls.
-1. Caching the best stations. For each address, I will save the best station offline, so that the next time I run it it will not make API calls at all.
-2. Get rid of unnecessary API calls for unlikely stations. Although the right time should only be calculated using directions instead of geometric distances, the use case here is very special. In fact, I don't believe there are more than three stations that we need to care about for finding the best station. Therefore, instead of making 30 API calls for all stations, I can confine my search to only three closest stations in terms of geo codes instead. The extra cost is that we now need to make extra call for finding the geo code for each apartment. But since we can also cache the result for geo code, it won't cause any trouble.
+1. Caching the best stations. For each address, I will save the best station offline, so that the next time I run the command line tool, it will not make API calls at all.
+2. Get rid of unnecessary API calls for unlikely stations. Although the accurate walking time should only be calculated using directions instead of geometric distances, the use case here is very special. In fact, I don't believe there are more than three stations that we need to care about for finding the best station. Therefore, instead of making 30 API calls for all stations, I can confine my search to only three closest stations in using geo codes. The extra cost is that we now need to make some API calls to find the geo code for each apartment. But since we can also cache the result for geo code, it won't cause any trouble.
 3. A good exception handling. Once I've reached the free API call limit number, the API call will raise an exception and to avoid previous work being wasted, I will save the data to cache immediately once the exception is caught.
 
 Here is some code excerpt for `distanceCalculator`:
@@ -293,7 +282,7 @@ class DistanceCalculator:
 ```
 
 ### The Apartment Finding Command Line Tool
-After all the data we need, writing a command line tool is almost trivial. Here is a list of functions that I essentially support:
+After getting all the data we need, writing a command line tool is almost trivial. Here is a list of functions that I essentially support:
 ```
 usage: rank_apts [--bed=min_bedroom] [--bath=min_bathroom] [--walk=min_walking_time] [--avail_before=date] [--avail_after=date] [--price=max_price] [--dist=distance][--topk=k] [-w] [-a] [--clean] output_file
 ```
@@ -302,7 +291,7 @@ While most options are very obvious, some specials ones are
 * -a: only consider apartments with A/C (Yes, a lot of apartments in the bay area does not have an A/C...)
 * --clean: re-crawl the data for ef
 
-The final output is a csv file containing all apartments that are of my interest sorted by price in ascending order.
+The final output is a `.csv` file containing all apartments that are of my interest sorted by price in ascending order.
 
 ## Conclusions
-Finding an apartment is definitely not an easy job, but at least I got some ease with a search that is exhaustive enough that I am confident it is the best I can get from the current listings. The project is mostly tailored for my personal interests, but hopefully it can inspire you for solving some problems you have in your life as well using the Internet.
+Finding an apartment is definitely not an easy job, but at least I got some ease with a search that is exhaustive enough so that I would be confident to say that I get the best I can find. The project is mostly tailored for my personal interests, but hopefully it can inspire you for solving some problems you have in your life as well. :)
