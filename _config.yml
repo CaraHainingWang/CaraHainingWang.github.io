@@ -12,10 +12,18 @@ url:              https://carahainingwang.github.io
 baseurl:          https://carahainingwang.github.io/
 
 author:
-  name:           'Mark Otto'
-  url:            https://twitter.com/mdo
+  name:           'Haining Wang'
+  url:            https://twitter.com/TechZinc
+  github_username: carahainingwang
 
-plugins: [jekyll-paginate]
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-feed
+
+feed:
+  path: atom.xml
+
 paginate:         5
 
 
@@ -26,4 +34,3 @@ params:
 
 
 github: [metadata]
-repo: https://github.com/carahainingwang

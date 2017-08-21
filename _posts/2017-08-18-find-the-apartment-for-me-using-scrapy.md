@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "How I Found the Apartment for Me Using Scrapy"
+published: true
 ---
 
 Apartment hunting is a painful experience. And if you are like me who struggled
