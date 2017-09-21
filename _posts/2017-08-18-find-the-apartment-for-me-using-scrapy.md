@@ -1,7 +1,8 @@
 ---
 layout: post
-title: "How I Found the Apartment for Me Using Scrapy"
+title: How I Found the Apartment for Me Using Scrapy
 published: true
+keywords: ["lifehack", "web scraping", "python"]
 ---
 
 Apartment hunting is a painful experience. If you were like me who is moving
